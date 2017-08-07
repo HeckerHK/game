@@ -70,7 +70,7 @@ class GameLogic {
         this.WebSocket.writeUTF(cmd);
     }
 
-    //socket获得数据之后的处理
+    //socket获得数据之后的处理，测试git
     private onReceiveMessage(): void {
         let msg = this.WebSocket.readUTF();
         let recData = JSON.parse(msg);
