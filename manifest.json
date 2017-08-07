@@ -1,0 +1,26 @@
+{
+	"initial": [
+		"libs/modules/egret/egret.js",
+		"libs/modules/egret/egret.web.js",
+		"libs/modules/eui/eui.js",
+		"libs/modules/res/res.js",
+		"libs/modules/tween/tween.js",
+		"libs/modules/socket/socket.js"
+	],
+	"game": [
+		"bin-debug/core/view/Ship.js",
+		"bin-debug/AssetAdapter.js",
+		"bin-debug/core/utils/MathUtil.js",
+		"bin-debug/core/utils/ViewUtil.js",
+		"bin-debug/core/view/GameScene.js",
+		"bin-debug/core/view/MainScene.js",
+		"bin-debug/core/view/Monster.js",
+		"bin-debug/core/logic/GameLogic.js",
+		"bin-debug/core/view/Ship2.js",
+		"bin-debug/core/vo/MonsterVO.js",
+		"bin-debug/core/vo/SendData.js",
+		"bin-debug/LoadingUI.js",
+		"bin-debug/Main.js",
+		"bin-debug/ThemeAdapter.js"
+	]
+}
