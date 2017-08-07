@@ -1,2 +1,2 @@
-#game
+# game
 this is my social game
