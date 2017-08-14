@@ -30,6 +30,8 @@ class GameLogic {
 
     public data: MonsterVO[];
     public shipData: ShipVO[];
+    private oldReqTime: number;
+    private currentReqTime: number;
 
 
     public startMain(): void {
@@ -74,7 +76,7 @@ class GameLogic {
         this.WebSocket.writeUTF(cmd);
     }
 
-    private closeSocket():void{
+    private closeSocket(): void {
         this.WebSocket.close();
     }
 
@@ -82,7 +84,8 @@ class GameLogic {
     private onReceiveMessage(): void {
         let msg = this.WebSocket.readUTF();
         let recData = JSON.parse(msg);
-        // console.log(recData);
+        this.currentReqTime = +new Date();
+        console.log(this.currentReqTime);
 
         switch (recData.type) {
             case 'leave':
@@ -93,21 +96,24 @@ class GameLogic {
                 this.createGame(recData.msg);
                 this.beginGame();
                 break;
-            case 'tankStatus':
-                this.changePos(recData.msg);
-                this.game.initMonsters();
-                this.game.ship_1p.setPos();
-                this.game.ship_2p.setPos();
+            case 'updateTank':
+                if (this.oldReqTime && this.oldReqTime < this.currentReqTime) {
+                    this.changePos(recData.msg);
+                    this.game.initMonsters();
+                    this.game.ship_1p.setPos();
+                    this.game.ship_2p.setPos();
+                }
+                this.oldReqTime = this.currentReqTime;
                 break;
         }
     }
 
-    private changePos(msg:string): void {
+    private changePos(msg: string): void {
         let tank: RecData = new RecData(msg);
         if (this.data != null) {
             this.data = [];
             let arr: Object[] = RES.getRes("mission_json");
-            for(let i: number = 0; i < tank.fishList.length; i++){
+            for (let i: number = 0; i < tank.fishList.length; i++) {
                 let vo: MonsterVO = new MonsterVO();
                 vo.id = tank.fishList[i]['type'];
                 vo.image = arr[vo.id]['image'];
@@ -120,7 +126,7 @@ class GameLogic {
             }
         }
 
-        if(this.shipData != null){
+        if (this.shipData != null) {
             this.shipData = [];
             let vo1: ShipVO = new ShipVO();
             vo1.xPos = tank.leftHook.x;
@@ -140,12 +146,12 @@ class GameLogic {
         this.GameStage.addChild(this.game);
     }
 
-    private createGame(msg:string): void {
+    private createGame(msg: string): void {
         let tank: RecData = new RecData(msg);
         if (this.data == null) {
             this.data = [];
             let arr: Object[] = RES.getRes("mission_json");
-            for(let i: number = 0; i < tank.fishList.length; i++){
+            for (let i: number = 0; i < tank.fishList.length; i++) {
                 let vo: MonsterVO = new MonsterVO();
                 vo.id = tank.fishList[i]['type'];
                 vo.image = arr[vo.id]['image'];
@@ -158,7 +164,7 @@ class GameLogic {
             }
         }
 
-        if(this.shipData == null){
+        if (this.shipData == null) {
             this.shipData = [];
             let vo1: ShipVO = new ShipVO();
             vo1.xPos = tank.leftHook.x;

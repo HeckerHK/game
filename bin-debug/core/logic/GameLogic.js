@@ -58,7 +58,8 @@ var GameLogic = (function () {
     GameLogic.prototype.onReceiveMessage = function () {
         var msg = this.WebSocket.readUTF();
         var recData = JSON.parse(msg);
-        // console.log(recData);
+        this.currentReqTime = +new Date();
+        console.log(this.currentReqTime);
         switch (recData.type) {
             case 'leave':
                 this.closeSocket();
@@ -68,11 +69,14 @@ var GameLogic = (function () {
                 this.createGame(recData.msg);
                 this.beginGame();
                 break;
-            case 'tankStatus':
-                this.changePos(recData.msg);
-                this.game.initMonsters();
-                this.game.ship_1p.setPos();
-                this.game.ship_2p.setPos();
+            case 'updateTank':
+                // if (this.oldReqTime && this.oldReqTime < this.currentReqTime) {
+                //     this.changePos(recData.msg);
+                //     this.game.initMonsters();
+                //     this.game.ship_1p.setPos();
+                //     this.game.ship_2p.setPos();
+                // }
+                // this.oldReqTime = this.currentReqTime;
                 break;
         }
     };
