@@ -1,4 +1,26 @@
-[{"id":1,"image":"gold_png","score":500,"max_num":3,"left":1,"pos":0,"movetype":0,"speedtime":8000},
-{"id":2,"image":"monster1_png","score":999,"max_num":1,"left":1,"pos":0,"movetype":0,"speedtime":15000},
-{"id":3,"image":"s13_png","max_num":2,"score":1500,"left":0,"pos":1,"movetype":0,"speedtime":25000},
-{"id":4,"image":"stone1_png","max_num":2,"left":0,"score":-50,"pos":2,"movetype":0,"speedtime":10000}]
+[
+    {
+        "id": 0,
+        "image": "gold_png",
+        "score": 500,
+        "swimSpeed":2
+    },
+    {
+        "id": 1,
+        "image": "monster1_png",
+        "score": 999,
+        "swimSpeed": 4
+    },
+    {
+        "id": 2,
+        "image": "s13_png",
+        "score": 1500,
+        "swimSpeed": 4
+    },
+    {
+        "id": 3,
+        "image": "stone1_png",
+        "score": -50,
+        "swimSpeed": 8
+    }
+]

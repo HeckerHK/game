@@ -7,9 +7,10 @@ class GameLogic {
     public constructor() {
     }
 
+    public static gameHost = 'http://localhost:3000';
     private static _instance: GameLogic;
     private WebSocket: egret.WebSocket;
-    private player: number;
+    public player: number;
     public static getInstance(): GameLogic {
         if (this._instance == null) {
             this._instance = new GameLogic();
@@ -23,10 +24,13 @@ class GameLogic {
 
     public main: MainScene;
     public game: GameScene;
-
+    //game info
+    public userId: number;
+    public roomId: number;
 
     public data: MonsterVO[];
-    public monsterRandomData: Monster[];
+    public shipData: ShipVO[];
+
 
     public startMain(): void {
         this.removeGame();
@@ -55,13 +59,13 @@ class GameLogic {
 
     //socket连接成功之后的处理
     private onSocketOpen(): void {
-        let obj = {
-            userid: 1,
-            type: 'create'
+        let obj;
+        if (this.player == 2) {
+            obj = new SendData('allReady', {});
+        } else {
+            obj = new SendData('create', {});
         }
-        let cmd = JSON.stringify(obj);
-        console.log("the connection is successful, send data: " + cmd);
-        this.WebSocket.writeUTF(cmd);
+        this.sendGameData(obj);
     }
 
     public sendGameData(arr: any) {
@@ -70,38 +74,62 @@ class GameLogic {
         this.WebSocket.writeUTF(cmd);
     }
 
+    private closeSocket():void{
+        this.WebSocket.close();
+    }
+
     //socket获得数据之后的处理，测试git
     private onReceiveMessage(): void {
         let msg = this.WebSocket.readUTF();
         let recData = JSON.parse(msg);
+        // console.log(recData);
 
         switch (recData.type) {
-            case 'holdOn':
+            case 'leave':
+                this.closeSocket();
                 break;
-            case 'game':
-                this.game.play(+recData.player);
-                break;
-            case 'ready':
-                this.player = recData.player;
-                // this.createGame();
-                break;
-            case 'go':
-                if (this.player !== 1) {
-                    this.player = recData.player;
-                }
-                this.createGame();
-                break;
-            case 'vo':
-                this.monsterRandomData = recData.gameData.monsterRandomData;
-                this.data = recData.gameData.data;
+            case 'startGame':
+                //do recData.msg
+                this.createGame(recData.msg);
                 this.beginGame();
                 break;
-            case 'addMonster':
-                this.game.addMonster(+recData.gameData.catchID, +recData.gameData.randomY);
+            case 'tankStatus':
+                this.changePos(recData.msg);
+                this.game.initMonsters();
+                this.game.ship_1p.setPos();
+                this.game.ship_2p.setPos();
                 break;
-            case 'goOn':
-                this.game[`ship_${recData.player}p`].goOn();
-                break;
+        }
+    }
+
+    private changePos(msg:string): void {
+        let tank: RecData = new RecData(msg);
+        if (this.data != null) {
+            this.data = [];
+            let arr: Object[] = RES.getRes("mission_json");
+            for(let i: number = 0; i < tank.fishList.length; i++){
+                let vo: MonsterVO = new MonsterVO();
+                vo.id = tank.fishList[i]['type'];
+                vo.image = arr[vo.id]['image'];
+                vo.score = parseInt(arr[vo.id]['score']);
+                vo.swimDirection = tank.fishList[i]['direction'];
+                vo.swimSpeed = parseInt(arr[vo.id]['swimSpeed']);
+                vo.xPos = parseInt(tank.fishList[i]['x']);
+                vo.yPos = parseInt(tank.fishList[i]['y']);
+                this.data.push(vo);
+            }
+        }
+
+        if(this.shipData != null){
+            this.shipData = [];
+            let vo1: ShipVO = new ShipVO();
+            vo1.xPos = tank.leftHook.x;
+            vo1.yPos = tank.leftHook.y;
+            this.shipData.push(vo1);
+            let vo2: ShipVO = new ShipVO();
+            vo2.xPos = tank.rightHook.x;
+            vo2.yPos = tank.rightHook.y;
+            this.shipData.push(vo2);
         }
     }
 
@@ -112,49 +140,71 @@ class GameLogic {
         this.GameStage.addChild(this.game);
     }
 
-    private createGame(): void {
-
-        if (this.player == 1) {
-            if (this.data == null) {
-                this.data = [];
-                let arr: Object[] = RES.getRes("mission_json");
-                for (let i: number = 0; i < arr.length; i++) {
-                    let vo: MonsterVO = new MonsterVO();
-                    vo.id = parseInt(arr[i]['id']);
-                    vo.image = arr[i]['image'];
-                    vo.max_num = parseInt(arr[i]['max_num']);
-                    vo.left = parseInt(arr[i]['left']);
-                    vo.pos = parseInt(arr[i]['pos']);
-                    vo.movetype = parseInt(arr[i]['movetype']);
-                    vo.speedtime = parseInt(arr[i]['speedtime']);
-                    vo.score = parseInt(arr[i]['score']);
-
-                    for (let j: number = 0; j < vo.max_num; j++) {
-                        this.data.push(vo);
-                    }
-                }
+    private createGame(msg:string): void {
+        let tank: RecData = new RecData(msg);
+        if (this.data == null) {
+            this.data = [];
+            let arr: Object[] = RES.getRes("mission_json");
+            for(let i: number = 0; i < tank.fishList.length; i++){
+                let vo: MonsterVO = new MonsterVO();
+                vo.id = tank.fishList[i]['type'];
+                vo.image = arr[vo.id]['image'];
+                vo.score = parseInt(arr[vo.id]['score']);
+                vo.swimDirection = tank.fishList[i]['direction'];
+                vo.swimSpeed = parseInt(arr[vo.id]['swimSpeed']);
+                vo.xPos = parseInt(tank.fishList[i]['x']);
+                vo.yPos = parseInt(tank.fishList[i]['y']);
+                this.data.push(vo);
             }
-
-            let moArr: MonsterVO[] = this.data;
-            if (moArr != null) {
-                var monsterRandomData = [];
-                for (let i: number = 0; i < moArr.length; i++) {
-                    let y = Math.random() * 300 + 240;
-                    monsterRandomData.push(y);
-                }
-            }
-
-            this.sendGameData(new SendData('vo', 1, { data: moArr, monsterRandomData: monsterRandomData }));
         }
+
+        if(this.shipData == null){
+            this.shipData = [];
+            let vo1: ShipVO = new ShipVO();
+            vo1.xPos = tank.leftHook.x;
+            vo1.yPos = tank.leftHook.y;
+            this.shipData.push(vo1);
+            let vo2: ShipVO = new ShipVO();
+            vo2.xPos = tank.rightHook.x;
+            vo2.yPos = tank.rightHook.y;
+            this.shipData.push(vo2);
+        }
+
     }
 
+    /**开始匹配 */
     public startGame(): void {
         this.removeMain();
+        let rand = 10000 * Math.random();
+        this.userId = Math.floor(rand);
+        let req = new egret.HttpRequest();
+        req.responseType = egret.HttpResponseType.TEXT;
+        req.open(`${GameLogic.gameHost}/api/getUrl?userid=${this.userId}`, egret.HttpMethod.GET);
+        // req.open("http://httpbin.org/get", egret.HttpMethod.GET);
+        req.send();
+        req.addEventListener(egret.Event.COMPLETE, this.onGetComplete, this);
+        req.addEventListener(egret.IOErrorEvent.IO_ERROR, this.onGetIOError, this);
+        req.addEventListener(egret.ProgressEvent.PROGRESS, this.onGetProgress, this);
+    }
 
+    private onGetComplete(event: egret.Event): void {
+        var request = <egret.HttpRequest>event.currentTarget;
+        egret.log("get data : ", request.response);
+        var recData = JSON.parse(request.response);
+        this.roomId = recData.data.roomId;
+        this.player = recData.data.player;
         this.WebSocket = new egret.WebSocket();
         this.WebSocket.addEventListener(egret.ProgressEvent.SOCKET_DATA, this.onReceiveMessage, this);
         this.WebSocket.addEventListener(egret.Event.CONNECT, this.onSocketOpen, this);
-        this.WebSocket.connect("192.168.10.210", 8001);
+        this.WebSocket.connect(recData.data.host, recData.data.port);
+    }
+
+    private onGetIOError(event: egret.IOErrorEvent): void {
+        egret.log("get error : " + event);
+    }
+
+    private onGetProgress(event: egret.ProgressEvent): void {
+        egret.log("get progress : " + Math.floor(100 * event.bytesLoaded / event.bytesTotal) + "%");
     }
 
     public removeGame(): void {

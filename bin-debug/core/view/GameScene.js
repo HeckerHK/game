@@ -34,12 +34,10 @@ var GameScene = (function (_super) {
     GameScene.prototype.initMonsters = function () {
         this.removeMonsters();
         var arr = GameLogic.getInstance().data;
-        var randomData = GameLogic.getInstance().monsterRandomData;
         if (arr != null) {
             for (var i = 0; i < arr.length; i++) {
                 var m = new Monster(arr[i]);
                 this.addChild(m);
-                m.y = +randomData[i];
                 this.monsterArr.push(m);
             }
         }
@@ -62,7 +60,7 @@ var GameScene = (function (_super) {
         this[score_txt].visible = false;
         this[score_txt].y = 100;
         this[score_txt].alpha = 1;
-        GameLogic.getInstance().sendGameData(new SendData('goOn', player, {}));
+        GameLogic.getInstance().sendGameData(new SendData('goOn', {}));
     };
     /**更改别的玩家分数*/
     GameScene.prototype.setAnotherScore = function (player, score) {
@@ -100,13 +98,10 @@ var GameScene = (function (_super) {
             }
         }
     };
-    /**开始游戏*/
+    /**出钩*/
     GameScene.prototype.start = function () {
-        var sendData = new SendData('game', this.player, {});
+        var sendData = new SendData('startThrow', {});
         GameLogic.getInstance().sendGameData(sendData);
-    };
-    GameScene.prototype.play = function (play) {
-        this["ship_" + play + "p"].start();
     };
     /**移除所有怪物*/
     GameScene.prototype.removeMonsters = function () {

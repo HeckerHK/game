@@ -32,16 +32,15 @@ class GameScene extends eui.Component {
     }
 
     /**初始化怪物数组*/
-    private initMonsters(): void {
+    public initMonsters(): void {
         this.removeMonsters();
 
         var arr: MonsterVO[] = GameLogic.getInstance().data;
-        var randomData = GameLogic.getInstance().monsterRandomData;
+
         if (arr != null) {
             for (var i: number = 0; i < arr.length; i++) {
                 var m: Monster = new Monster(arr[i]);
                 this.addChild(m);
-                m.y = +randomData[i];
                 this.monsterArr.push(m);
             }
         }
@@ -65,7 +64,7 @@ class GameScene extends eui.Component {
         this[score_txt].y = 100;
         this[score_txt].alpha = 1;
 
-        GameLogic.getInstance().sendGameData(new SendData('goOn', player, {}));
+        GameLogic.getInstance().sendGameData(new SendData('goOn', {}));
 
     }
     /**更改别的玩家分数*/
@@ -107,14 +106,10 @@ class GameScene extends eui.Component {
     }
 
 
-    /**开始游戏*/
+    /**出钩*/
     private start(): void {
-        let sendData = new SendData('game', this.player, {});
+        let sendData = new SendData('startThrow', {});
         GameLogic.getInstance().sendGameData(sendData);
-    }
-
-    public play(play: number) {
-        this[`ship_${play}p`].start();
     }
 
     /**移除所有怪物*/

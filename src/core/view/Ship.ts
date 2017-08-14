@@ -18,7 +18,7 @@ class Ship extends eui.Component {
 
     /**摇摆动画*/
     private tw1: egret.Tween;
-    /**怪物动画*/
+    /**抓怪动画*/
     private tw2: egret.Tween;
     private player: number = 1;
 
@@ -56,9 +56,16 @@ class Ship extends eui.Component {
     }
     private prepareStart(): void {
         this.isCatch = false;
-        this.tw1 = egret.Tween.get(this, { loop: true });
-        this.rotation = this.r;
-        this.tw1.to({ rotation: -this.r }, 3000).wait(100).to({ rotation: this.r }, 3000);
+        // this.tw1 = egret.Tween.get(this, { loop: true });
+        // this.rotation = this.r;
+        // this.tw1.to({ rotation: -this.r }, 3000).wait(100).to({ rotation: this.r }, 3000);
+        this.x = GameLogic.getInstance().shipData[0].xPos;
+        this.y = GameLogic.getInstance().shipData[0].yPos;
+    }
+
+    public setPos(): void{
+        this.x = GameLogic.getInstance().shipData[0].xPos;
+        this.y = GameLogic.getInstance().shipData[0].yPos;
     }
 
     private getTime(dis: number): number {
@@ -127,12 +134,12 @@ class Ship extends eui.Component {
         if (this.catched != null && this.catched.parent != null) {
             this.catched.parent.removeChild(this.catched);
 
-            GameLogic.getInstance().sendGameData(new SendData('addMonster', 1, { catchID: this.catchID, randomY: Math.random() * 300 + 240 }));
+            GameLogic.getInstance().sendGameData(new SendData('addMonster', { catchID: this.catchID, randomY: Math.random() * 300 + 240 }));
 
             GameLogic.getInstance().game.setScore((this.catched as Monster).vo.score, this.player);
         }
         else {
-            GameLogic.getInstance().sendGameData(new SendData('goOn',1,{}));
+            GameLogic.getInstance().sendGameData(new SendData('goOn',{}));
         }
         this.line.visible = false;
         this.catched = null;

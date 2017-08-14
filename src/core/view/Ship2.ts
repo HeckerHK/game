@@ -56,12 +56,18 @@ class Ship2 extends eui.Component
         this.tw2 = egret.Tween.get(this, { onChange: this.changeline, onChangeObj: this });
         this.tw2.to({ x: this.zeroX, y: this.zeroY }, time).call(this.setScore, this);
     }
-    private prepareStart(): void
-    {
+    private prepareStart(): void {
         this.isCatch = false;
-        this.tw1 = egret.Tween.get(this, { loop: true });
-        this.rotation = this.r;
-        this.tw1.to({ rotation: -this.r }, 3000).wait(100).to({ rotation: this.r }, 3000);
+        // this.tw1 = egret.Tween.get(this, { loop: true });
+        // this.rotation = this.r;
+        // this.tw1.to({ rotation: -this.r }, 3000).wait(100).to({ rotation: this.r }, 3000);
+        this.x = GameLogic.getInstance().shipData[1].xPos;
+        this.y = GameLogic.getInstance().shipData[1].yPos;
+    }
+
+    public setPos(): void{
+        this.x = GameLogic.getInstance().shipData[1].xPos;
+        this.y = GameLogic.getInstance().shipData[1].yPos;
     }
 
     private getTime(dis: number): number
@@ -140,13 +146,13 @@ class Ship2 extends eui.Component
         {
             this.catched.parent.removeChild(this.catched);
             // GameLogic.getInstance().game.addMonster(this.catchID);
-            GameLogic.getInstance().sendGameData(new SendData('addMonster', 2, { catchID: this.catchID, randomY: Math.random() * 300 + 240 }));
+            GameLogic.getInstance().sendGameData(new SendData('addMonster', { catchID: this.catchID, randomY: Math.random() * 300 + 240 }));
             
             GameLogic.getInstance().game.setScore((this.catched as Monster).vo.score,this.player);
         }
         else
         {
-            GameLogic.getInstance().sendGameData(new SendData('goOn',2,{}));
+            GameLogic.getInstance().sendGameData(new SendData('goOn',{}));
         }
         this.line.visible = false;
         this.catched = null;

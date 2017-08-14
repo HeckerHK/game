@@ -25,18 +25,21 @@ var Monster = (function (_super) {
         this.visible = false;
         this.play();
     };
+    /**上上下下的动画s*/
     Monster.prototype.play = function () {
         var tw = egret.Tween.get(this.bg);
         tw.to({ y: -5 }, 1000).wait(200).to({ y: 5 }, 1000).call(this.play, this);
     };
     Monster.prototype.start = function () {
-        this.birthX = 0;
-        this.tarX = GameLogic.getInstance().GameStage_width;
-        this.tarY = this.y;
-        this.x = this.birthX;
+        // this.birthX = 0;
+        // this.tarX = GameLogic.getInstance().GameStage_width;
+        // this.tarY = this.y;
+        // this.x = this.birthX;
+        this.x = this.vo.xPos;
+        this.y = this.vo.yPos;
         this.visible = true;
-        var tw = egret.Tween.get(this);
-        tw.to({ x: this.tarX, y: this.tarY }, this.vo.speedtime).call(this.moveOver, this);
+        // var tw = egret.Tween.get(this);
+        // tw.to({ x: this.tarX, y: this.tarY }, this.vo.speedtime).call(this.moveOver, this);
     };
     Monster.prototype.moveOver = function () {
         this.start();

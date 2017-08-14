@@ -37,50 +37,72 @@ var GameLogic = (function () {
     };
     //socket连接成功之后的处理
     GameLogic.prototype.onSocketOpen = function () {
-        var obj = {
-            userid: 1,
-            type: 'create'
-        };
-        var cmd = JSON.stringify(obj);
-        console.log("the connection is successful, send data: " + cmd);
-        this.WebSocket.writeUTF(cmd);
+        var obj;
+        if (this.player == 2) {
+            obj = new SendData('allReady', {});
+        }
+        else {
+            obj = new SendData('create', {});
+        }
+        this.sendGameData(obj);
     };
     GameLogic.prototype.sendGameData = function (arr) {
         var cmd = JSON.stringify(arr);
         console.log("the send data: " + cmd);
         this.WebSocket.writeUTF(cmd);
     };
-    //socket获得数据之后的处理
+    GameLogic.prototype.closeSocket = function () {
+        this.WebSocket.close();
+    };
+    //socket获得数据之后的处理，测试git
     GameLogic.prototype.onReceiveMessage = function () {
         var msg = this.WebSocket.readUTF();
         var recData = JSON.parse(msg);
+        // console.log(recData);
         switch (recData.type) {
-            case 'holdOn':
+            case 'leave':
+                this.closeSocket();
                 break;
-            case 'game':
-                this.game.play(+recData.player);
-                break;
-            case 'ready':
-                this.player = recData.player;
-                // this.createGame();
-                break;
-            case 'go':
-                if (this.player !== 1) {
-                    this.player = recData.player;
-                }
-                this.createGame();
-                break;
-            case 'vo':
-                this.monsterRandomData = recData.gameData.monsterRandomData;
-                this.data = recData.gameData.data;
+            case 'startGame':
+                //do recData.msg
+                this.createGame(recData.msg);
                 this.beginGame();
                 break;
-            case 'addMonster':
-                this.game.addMonster(+recData.gameData.catchID, +recData.gameData.randomY);
+            case 'tankStatus':
+                this.changePos(recData.msg);
+                this.game.initMonsters();
+                this.game.ship_1p.setPos();
+                this.game.ship_2p.setPos();
                 break;
-            case 'goOn':
-                this.game["ship_" + recData.player + "p"].goOn();
-                break;
+        }
+    };
+    GameLogic.prototype.changePos = function (msg) {
+        var tank = new RecData(msg);
+        if (this.data != null) {
+            this.data = [];
+            var arr = RES.getRes("mission_json");
+            for (var i = 0; i < tank.fishList.length; i++) {
+                var vo = new MonsterVO();
+                vo.id = tank.fishList[i]['type'];
+                vo.image = arr[vo.id]['image'];
+                vo.score = parseInt(arr[vo.id]['score']);
+                vo.swimDirection = tank.fishList[i]['direction'];
+                vo.swimSpeed = parseInt(arr[vo.id]['swimSpeed']);
+                vo.xPos = parseInt(tank.fishList[i]['x']);
+                vo.yPos = parseInt(tank.fishList[i]['y']);
+                this.data.push(vo);
+            }
+        }
+        if (this.shipData != null) {
+            this.shipData = [];
+            var vo1 = new ShipVO();
+            vo1.xPos = tank.leftHook.x;
+            vo1.yPos = tank.leftHook.y;
+            this.shipData.push(vo1);
+            var vo2 = new ShipVO();
+            vo2.xPos = tank.rightHook.x;
+            vo2.yPos = tank.rightHook.y;
+            this.shipData.push(vo2);
         }
     };
     GameLogic.prototype.beginGame = function () {
@@ -89,43 +111,65 @@ var GameLogic = (function () {
         }
         this.GameStage.addChild(this.game);
     };
-    GameLogic.prototype.createGame = function () {
-        if (this.player == 1) {
-            if (this.data == null) {
-                this.data = [];
-                var arr = RES.getRes("mission_json");
-                for (var i = 0; i < arr.length; i++) {
-                    var vo = new MonsterVO();
-                    vo.id = parseInt(arr[i]['id']);
-                    vo.image = arr[i]['image'];
-                    vo.max_num = parseInt(arr[i]['max_num']);
-                    vo.left = parseInt(arr[i]['left']);
-                    vo.pos = parseInt(arr[i]['pos']);
-                    vo.movetype = parseInt(arr[i]['movetype']);
-                    vo.speedtime = parseInt(arr[i]['speedtime']);
-                    vo.score = parseInt(arr[i]['score']);
-                    for (var j = 0; j < vo.max_num; j++) {
-                        this.data.push(vo);
-                    }
-                }
+    GameLogic.prototype.createGame = function (msg) {
+        var tank = new RecData(msg);
+        if (this.data == null) {
+            this.data = [];
+            var arr = RES.getRes("mission_json");
+            for (var i = 0; i < tank.fishList.length; i++) {
+                var vo = new MonsterVO();
+                vo.id = tank.fishList[i]['type'];
+                vo.image = arr[vo.id]['image'];
+                vo.score = parseInt(arr[vo.id]['score']);
+                vo.swimDirection = tank.fishList[i]['direction'];
+                vo.swimSpeed = parseInt(arr[vo.id]['swimSpeed']);
+                vo.xPos = parseInt(tank.fishList[i]['x']);
+                vo.yPos = parseInt(tank.fishList[i]['y']);
+                this.data.push(vo);
             }
-            var moArr = this.data;
-            if (moArr != null) {
-                var monsterRandomData = [];
-                for (var i = 0; i < moArr.length; i++) {
-                    var y = Math.random() * 300 + 240;
-                    monsterRandomData.push(y);
-                }
-            }
-            this.sendGameData(new SendData('vo', 1, { data: moArr, monsterRandomData: monsterRandomData }));
+        }
+        if (this.shipData == null) {
+            this.shipData = [];
+            var vo1 = new ShipVO();
+            vo1.xPos = tank.leftHook.x;
+            vo1.yPos = tank.leftHook.y;
+            this.shipData.push(vo1);
+            var vo2 = new ShipVO();
+            vo2.xPos = tank.rightHook.x;
+            vo2.yPos = tank.rightHook.y;
+            this.shipData.push(vo2);
         }
     };
+    /**开始匹配 */
     GameLogic.prototype.startGame = function () {
         this.removeMain();
+        var rand = 10000 * Math.random();
+        this.userId = Math.floor(rand);
+        var req = new egret.HttpRequest();
+        req.responseType = egret.HttpResponseType.TEXT;
+        req.open(GameLogic.gameHost + "/api/getUrl?userid=" + this.userId, egret.HttpMethod.GET);
+        // req.open("http://httpbin.org/get", egret.HttpMethod.GET);
+        req.send();
+        req.addEventListener(egret.Event.COMPLETE, this.onGetComplete, this);
+        req.addEventListener(egret.IOErrorEvent.IO_ERROR, this.onGetIOError, this);
+        req.addEventListener(egret.ProgressEvent.PROGRESS, this.onGetProgress, this);
+    };
+    GameLogic.prototype.onGetComplete = function (event) {
+        var request = event.currentTarget;
+        egret.log("get data : ", request.response);
+        var recData = JSON.parse(request.response);
+        this.roomId = recData.data.roomId;
+        this.player = recData.data.player;
         this.WebSocket = new egret.WebSocket();
         this.WebSocket.addEventListener(egret.ProgressEvent.SOCKET_DATA, this.onReceiveMessage, this);
         this.WebSocket.addEventListener(egret.Event.CONNECT, this.onSocketOpen, this);
-        this.WebSocket.connect("192.168.10.210", 8001);
+        this.WebSocket.connect(recData.data.host, recData.data.port);
+    };
+    GameLogic.prototype.onGetIOError = function (event) {
+        egret.log("get error : " + event);
+    };
+    GameLogic.prototype.onGetProgress = function (event) {
+        egret.log("get progress : " + Math.floor(100 * event.bytesLoaded / event.bytesTotal) + "%");
     };
     GameLogic.prototype.removeGame = function () {
         if (this.game != null && this.game.parent != null) {
@@ -134,5 +178,6 @@ var GameLogic = (function () {
     };
     return GameLogic;
 }());
+GameLogic.gameHost = 'http://localhost:3000';
 __reflect(GameLogic.prototype, "GameLogic");
 //# sourceMappingURL=GameLogic.js.map
