@@ -117,7 +117,6 @@ var Ship2 = (function (_super) {
             this.catched.parent.removeChild(this.catched);
             // GameLogic.getInstance().game.addMonster(this.catchID);
             GameLogic.getInstance().sendGameData(new SendData('addMonster', { catchID: this.catchID, randomY: Math.random() * 300 + 240 }));
-            GameLogic.getInstance().game.setScore(this.catched.vo.score, this.player);
         }
         else {
             GameLogic.getInstance().sendGameData(new SendData('goOn', {}));

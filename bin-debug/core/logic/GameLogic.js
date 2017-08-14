@@ -70,13 +70,14 @@ var GameLogic = (function () {
                 this.beginGame();
                 break;
             case 'updateTank':
-                // if (this.oldReqTime && this.oldReqTime < this.currentReqTime) {
-                //     this.changePos(recData.msg);
-                //     this.game.initMonsters();
-                //     this.game.ship_1p.setPos();
-                //     this.game.ship_2p.setPos();
-                // }
-                // this.oldReqTime = this.currentReqTime;
+                if (this.oldReqTime && this.oldReqTime < this.currentReqTime) {
+                    this.changePos(recData.msg);
+                    this.game.initMonsters();
+                    this.game.ship_1p.setPos();
+                    this.game.ship_2p.setPos();
+                    this.game.setScore();
+                }
+                this.oldReqTime = this.currentReqTime;
                 break;
         }
     };
@@ -102,10 +103,12 @@ var GameLogic = (function () {
             var vo1 = new ShipVO();
             vo1.xPos = tank.leftHook.x;
             vo1.yPos = tank.leftHook.y;
+            vo1.score = tank.leftHook.score;
             this.shipData.push(vo1);
             var vo2 = new ShipVO();
             vo2.xPos = tank.rightHook.x;
             vo2.yPos = tank.rightHook.y;
+            vo2.score = tank.rightHook.score;
             this.shipData.push(vo2);
         }
     };
@@ -182,6 +185,6 @@ var GameLogic = (function () {
     };
     return GameLogic;
 }());
-GameLogic.gameHost = 'http://localhost:3000';
+GameLogic.gameHost = 'http://192.168.10.210:3000';
 __reflect(GameLogic.prototype, "GameLogic");
 //# sourceMappingURL=GameLogic.js.map

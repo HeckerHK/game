@@ -7,7 +7,7 @@ class GameLogic {
     public constructor() {
     }
 
-    public static gameHost = 'http://localhost:3000';
+    public static gameHost = 'http://192.168.10.210:3000';
     private static _instance: GameLogic;
     private WebSocket: egret.WebSocket;
     public player: number;
@@ -102,6 +102,7 @@ class GameLogic {
                     this.game.initMonsters();
                     this.game.ship_1p.setPos();
                     this.game.ship_2p.setPos();
+                    this.game.setScore();
                 }
                 this.oldReqTime = this.currentReqTime;
                 break;
@@ -131,10 +132,12 @@ class GameLogic {
             let vo1: ShipVO = new ShipVO();
             vo1.xPos = tank.leftHook.x;
             vo1.yPos = tank.leftHook.y;
+            vo1.score = tank.leftHook.score;
             this.shipData.push(vo1);
             let vo2: ShipVO = new ShipVO();
             vo2.xPos = tank.rightHook.x;
             vo2.yPos = tank.rightHook.y;
+            vo2.score = tank.rightHook.score;
             this.shipData.push(vo2);
         }
     }

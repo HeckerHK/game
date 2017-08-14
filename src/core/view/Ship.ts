@@ -136,7 +136,7 @@ class Ship extends eui.Component {
 
             GameLogic.getInstance().sendGameData(new SendData('addMonster', { catchID: this.catchID, randomY: Math.random() * 300 + 240 }));
 
-            GameLogic.getInstance().game.setScore((this.catched as Monster).vo.score, this.player);
+            // GameLogic.getInstance().game.setScore((this.catched as Monster).vo.score, this.player);
         }
         else {
             GameLogic.getInstance().sendGameData(new SendData('goOn',{}));

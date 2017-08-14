@@ -44,14 +44,15 @@ var GameScene = (function (_super) {
         this.monsterStart();
     };
     /**得分*/
-    GameScene.prototype.setScore = function (n, player) {
-        var score_txt = "score_txt_" + player + "p";
-        this[score_txt].text = n.toString();
-        this[score_txt].visible = true;
-        this["score_" + player + "p"] += n;
-        egret.Tween.get(this[score_txt]).to({ x: this["total_score_txt_" + player + "p"].x + 20, y: this["total_score_txt_" + player + "p"].y }, 1000).call(function (player) {
-            GameLogic.getInstance().game.clearScore(player);
-        }, this, [player]);
+    GameScene.prototype.setScore = function () {
+        // let score_txt = `score_txt_${player}p`;
+        // this[score_txt].text = n.toString();
+        // this[score_txt].visible = true;
+        this.total_score_txt_1p.text = GameLogic.getInstance().shipData[0].score.toString();
+        this.total_score_txt_2p.text = GameLogic.getInstance().shipData[1].score.toString();
+        // egret.Tween.get(this[score_txt]).to({ x: this[`total_score_txt_${player}p`].x + 20, y: this[`total_score_txt_${player}p`].y }, 1000).call(function (player: number) {
+        //     GameLogic.getInstance().game.clearScore(player);
+        // }, this, [player]);
     };
     /**清除分数*/
     GameScene.prototype.clearScore = function (player) {

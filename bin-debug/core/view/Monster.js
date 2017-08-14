@@ -37,9 +37,17 @@ var Monster = (function (_super) {
         // this.x = this.birthX;
         this.x = this.vo.xPos;
         this.y = this.vo.yPos;
+        this.tarY = this.y;
         this.visible = true;
-        // var tw = egret.Tween.get(this);
-        // tw.to({ x: this.tarX, y: this.tarY }, this.vo.speedtime).call(this.moveOver, this);
+        var tw = egret.Tween.get(this);
+        if (this.vo.swimDirection == 0) {
+            this.tarX = this.x + this.vo.swimSpeed * 20;
+            tw.to({ x: this.tarX, y: this.tarY }, 1000);
+        }
+        else if (this.vo.swimDirection == 1) {
+            this.tarX = this.x - this.vo.swimSpeed * 20;
+            tw.to({ x: this.tarX, y: this.tarY }, 1000);
+        }
     };
     Monster.prototype.moveOver = function () {
         this.start();

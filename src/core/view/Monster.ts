@@ -3,8 +3,7 @@
  * @author 
  *
  */
-class Monster extends egret.Sprite
-{
+class Monster extends egret.Sprite {
     private bg: egret.Bitmap;
 
     public vo: MonsterVO;
@@ -13,32 +12,28 @@ class Monster extends egret.Sprite
     private tarX: number;
     private tarY: number;
 
-    public constructor(vo: MonsterVO)
-    {
+    public constructor(vo: MonsterVO) {
         super();
         this.vo = vo;
 
         this.init();
     }
 
-    private init(): void
-    {
+    private init(): void {
         this.bg = new egret.Bitmap(RES.getRes(this.vo.image));
         this.addChild(this.bg);
-        
+
         this.visible = false;
         this.play();
     }
 
     /**上上下下的动画s*/
-    private play(): void
-    {
+    private play(): void {
         var tw = egret.Tween.get(this.bg);
         tw.to({ y: -5 }, 1000).wait(200).to({ y: 5 }, 1000).call(this.play, this);
     }
 
-    public start(): void
-    {
+    public start(): void {
         // this.birthX = 0;
         // this.tarX = GameLogic.getInstance().GameStage_width;
         // this.tarY = this.y;
@@ -46,19 +41,24 @@ class Monster extends egret.Sprite
 
         this.x = this.vo.xPos;
         this.y = this.vo.yPos;
+        this.tarY = this.y;
         this.visible = true;
 
-        // var tw = egret.Tween.get(this);
-        // tw.to({ x: this.tarX, y: this.tarY }, this.vo.speedtime).call(this.moveOver, this);
+        var tw = egret.Tween.get(this);
+        if (this.vo.swimDirection == 0) {
+            this.tarX = this.x + this.vo.swimSpeed * 20;
+            tw.to({ x: this.tarX, y: this.tarY }, 1000);
+        } else if (this.vo.swimDirection == 1) {
+            this.tarX = this.x - this.vo.swimSpeed * 20;
+            tw.to({ x: this.tarX, y: this.tarY }, 1000);
+        }
     }
 
-    private moveOver(): void
-    {
+    private moveOver(): void {
         this.start();
     }
 
-    public clear(): void
-    {
+    public clear(): void {
         egret.Tween.removeTweens(this);
     }
 }

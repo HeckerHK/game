@@ -14,4 +14,6 @@ class ShipVO {
 	public yPos:number;
 
 	public speed:number;
+
+	public score:number;
 }
