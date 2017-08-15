@@ -6,6 +6,7 @@
 class Ship extends eui.Component {
     private line: egret.Shape;
     private isCatch: boolean;
+    /**钩子的初始坐标*/
     private zeroX: number;
     private zeroY: number;
     private catchID: number = -1;
@@ -93,7 +94,7 @@ class Ship extends eui.Component {
 
         this.line.visible = true;
 
-        var r: number = this.rotation;
+        var r: number = this.rotation;//斜率
         var hudu: number = r * Math.PI / 180;
         var tag: number = Math.tan(hudu);
         var w = tag * this.h;
@@ -101,13 +102,14 @@ class Ship extends eui.Component {
         var tarY: number = this.h;
         if (tarX < 50) {
             tarX = 50;
-            tarY = GameLogic.getInstance().GameStage_width / 2 / tag;
+            // tarY = GameLogic.getInstance().GameStage_width / 2 / tag;
         }
         else if (tarX > GameLogic.getInstance().GameStage_width - 50) {
             tarX = GameLogic.getInstance().GameStage_width - 50;
             tarY = -GameLogic.getInstance().GameStage_width / 2 / tag;
         }
         var time: number = this.getTime(this.getDistance(tarX, tarY));
+        //算出终点，未碰到任何物体停顿100ms直接返回
         this.tw2.to({ x: tarX, y: tarY }, time).wait(100).call(this.goBack, this);
     }
 
